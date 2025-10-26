@@ -160,8 +160,8 @@ int main(void)
 	}
 	glBindVertexArray(0);
 
-	unsigned int diffuseMap = loadTexture("Resource/container_diffuse.png");
-	unsigned int specularMap = loadTexture("Resource/container_specular.png");
+	unsigned int diffuseMap = loadTexture("Resources/container_diffuse.png");
+	unsigned int specularMap = loadTexture("Resources/container_specular.png");
 
 	while (!glfwWindowShouldClose(window))
 	{

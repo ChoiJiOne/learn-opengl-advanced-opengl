@@ -16,7 +16,6 @@ Build
 *.vcxproj
 *.aps
 *.bin
-*.png
 
 # 파이썬 관련 설정
 .venv
