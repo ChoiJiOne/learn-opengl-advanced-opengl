@@ -27,3 +27,4 @@ find_package(Stb REQUIRED)
 find_package(glm CONFIG REQUIRED)
 
 add_subdirectory(01.DepthTesting)
+add_subdirectory(02.StencilTesting)
