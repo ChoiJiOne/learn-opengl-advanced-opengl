@@ -65,8 +65,7 @@ int main(void)
 
 	// CHECKME: 깊이 테스트 활성화.
 	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_ALWAYS);
-	//glDepthFunc(GL_LESS);
+	glDepthFunc(GL_LESS);
 
 	Shader shader("Shader/DepthTesting.vert", "Shader/DepthTesting.frag");
 	
