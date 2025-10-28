@@ -66,8 +66,12 @@ int main(void)
 	// CHECKME: 깊이 테스트 활성화.
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
+	glEnable(GL_STENCIL_TEST);
+	glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+	glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 
-	Shader shader("Shader/DepthTesting.vert", "Shader/DepthTesting.frag");
+	Shader shader("Shader/StencilTesting.vert", "Shader/StencilTesting.frag");
+	Shader shaderSingleColor("Shader/StencilSingleColor.vert", "Shader/StencilSingleColor.frag");
 	
 	std::vector<float> vertices =
 	{ 
@@ -178,18 +182,36 @@ int main(void)
 		processInput(window);
 
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-		glm::mat4 model = glm::mat4(1.0f);
 		glm::mat4 view = camera.GetViewMatrix();
 		glm::mat4 projection = glm::perspective(glm::radians(camera.GetZoom()), static_cast<float>(SCR_WIDTH) / static_cast<float>(SCR_HEIGHT), 0.1f, 100.0f);
 
-		// Pass
+		// Draw Floor
 		shader.Bind();
 		{
+			glm::mat4 model = glm::mat4(1.0f);
+
+			shader.SetMat4("model", model);
 			shader.SetMat4("view", view);
 			shader.SetMat4("projection", projection);
-			
+
+			glBindVertexArray(planeVAO);
+			{
+				glStencilMask(0x00);
+				glActiveTexture(GL_TEXTURE0);
+				glBindTexture(GL_TEXTURE_2D, floorTexture);
+				glDrawArrays(GL_TRIANGLES, 0, 6);
+			}
+			glBindVertexArray(0);
+		}
+		shader.Unbind();
+
+		shader.Bind();
+		{
+			glStencilFunc(GL_ALWAYS, 1, 0xFF);
+			glStencilMask(0xFF);
+
 			// Cube
 			shader.SetMat4("model", glm::translate(glm::mat4(1.0f), glm::vec3(-1.0f, 0.0f, -1.0f)));
 			glBindVertexArray(cubeVAO);
@@ -204,15 +226,46 @@ int main(void)
 			glBindTexture(GL_TEXTURE_2D, cubeTexture);
 			glDrawArrays(GL_TRIANGLES, 0, 36);
 
-			// Floor
-			shader.SetMat4("model", glm::mat4(1.0f));
-			glBindVertexArray(planeVAO);
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, floorTexture);
-			glDrawArrays(GL_TRIANGLES, 0, 6);
+			glBindVertexArray(0);
 		}
 		shader.Unbind();
 
+		shaderSingleColor.Bind();
+		{
+			glm::mat4 model = glm::mat4(1.0f);
+
+			shaderSingleColor.SetMat4("view", view);
+			shaderSingleColor.SetMat4("projection", projection);
+
+			glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+			glStencilMask(0x00);
+			glDisable(GL_DEPTH_TEST);
+
+			float scale = 1.1f;
+			glBindVertexArray(cubeVAO);
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, cubeTexture);
+
+			model = glm::mat4(1.0f);
+			model = glm::translate(model, glm::vec3(-1.0f, 0.0f, -1.0f));
+			model = glm::scale(model, glm::vec3(scale, scale, scale));
+			shaderSingleColor.SetMat4("model", model);
+			glDrawArrays(GL_TRIANGLES, 0, 36);
+
+			model = glm::mat4(1.0f);
+			model = glm::translate(model, glm::vec3(2.0f, 0.0f, 0.0f));
+			model = glm::scale(model, glm::vec3(scale, scale, scale));
+			shaderSingleColor.SetMat4("model", model);
+			glDrawArrays(GL_TRIANGLES, 0, 36);
+
+			glBindVertexArray(0);
+
+			glStencilMask(0xFF);
+			glStencilFunc(GL_ALWAYS, 0, 0xFF);
+			glEnable(GL_DEPTH_TEST);
+		}
+		shaderSingleColor.Unbind();
+		
 		glfwSwapBuffers(window);
 	}
 
