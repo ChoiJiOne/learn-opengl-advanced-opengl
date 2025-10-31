@@ -66,6 +66,8 @@ int main(void)
 
 	// CHECKME: 깊이 테스트 활성화.
 	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	Shader shader("Shader/Blending.vert", "Shader/Blending.frag");
 	
@@ -139,7 +141,7 @@ int main(void)
 		1.0f,  0.5f,  0.0f,  1.0f,  0.0f
 	};
 
-	std::vector<glm::vec3> vegetation
+	std::vector<glm::vec3> windows
 	{
 		glm::vec3(-1.5f, 0.0f, -0.48f),
 		glm::vec3( 1.5f, 0.0f, 0.51f),
@@ -162,7 +164,7 @@ int main(void)
 
 	unsigned int cubeTexture = loadTexture("Resources/marble.jpg");
 	unsigned int floorTexture = loadTexture("Resources/metal.png");
-	unsigned int transparentTexture = loadTexture("Resources/grass.png");
+	unsigned int windowTexture = loadTexture("Resources/window.png");
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -210,11 +212,11 @@ int main(void)
 			glBindVertexArray(transparentVAO);
 			{
 				glBindVertexArray(transparentVAO);
-				glBindTexture(GL_TEXTURE_2D, transparentTexture);
+				glBindTexture(GL_TEXTURE_2D, windowTexture);
 
-				for (unsigned int i = 0; i < vegetation.size(); i++)
+				for (unsigned int i = 0; i < windows.size(); i++)
 				{
-					shader.SetMat4("model", glm::translate(glm::mat4(1.0f), vegetation[i]));
+					shader.SetMat4("model", glm::translate(glm::mat4(1.0f), windows[i]));
 					glDrawArrays(GL_TRIANGLES, 0, 6);
 				}
 			}
